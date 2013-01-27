@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <title>Javascript Demo</title>
+        <script>
+            function addEmployee(){
+                var name = document.getElementById("employee-name").value;
+                var job = document.getElementById("job-title").value;
+                var row = "<tr><td>"+name+"</td><td>"+job+"</td></tr>";
+                document.getElementById('employees').innerHTML += row;
+            }
+        </script>
+    </head>
+    <body>
+        <form name="new-employee">
+            Name: <input type="text" id="employee-name"><br />
+            Title: <input type="text" id="job-title"><br />
+            <input type='button' onclick='addEmployee()' value='Submit Employee'/>
+        </form>
+        <table>
+            <thead><tr><td>Name</td><td>Job Title</td></tr></thead>
+            <tbody id="employees"></tbody>
+        </table>
+    </body>
+</html>

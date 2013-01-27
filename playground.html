@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <title>Javascript Demo</title>
+        <script>
+            function addEmployee(name, job){
+                var row = "<tr><td>"+name+"</td><td>"+job+"</td></tr>";
+                document.getElementById('employees').innerHTML += row;
+            }
+            function add(){
+                var employee = new Object();
+                employee.name = document.getElementById("employee-name").value;
+                employee.job = document.getElementById("job-title").value;
+                addEmployee(employee.name, employee.job);
+            }
+        </script>
+        <style type="text/css">
+            .centerDiv{
+                position: absolute;
+                top: 0%;
+                height: 200px;
+                margin-top: 0px; /* Half of the height */
+                left: 100%;
+                width:200px;
+                margin-left: -250px; /* Half of the width */
+                border-radius: 5px;
+                background:#ccc;
+                padding:10px;
+                }
+        </style>
+    </head>
+    <body>
+        <div id = "centerDiv" class = "centerDiv">
+        <form name="new-employee">
+            Name: <input type="text" id="employee-name"><br />
+            Title: <input type="text" id="job-title"><br />
+            <input type='button' onclick='add()' value='Submit Employee'/>
+        </form>
+        </div>
+        <table>
+            <thead><tr><td>Name</td><td>Job Title</td></tr></thead>
+            <tbody id="employees"></tbody>
+        </table>
+    </body>
+</html>
