@@ -9,6 +9,8 @@
             var stop = false; // debug flag
             var maxFood = <?php echo $_GET["foods"]; ?>;
             var speed = <?php echo $_GET["speed"]; ?>;
+            var difficulty = <?php echo $_GET["diff"]; ?>;
+            var enable = true; // input filter
             function SnakeBody() {  // same class for snake head & snake body.
                 this.x = -1;
                 this.y = -1;
@@ -45,15 +47,11 @@
                     }
                 }
                 
-                for (var i = 0; i < boardSize; i++) {
-                    this.board[0][i] = 'w';
-                    this.board[boardSize - 1][i] = 'w';
-                    this.board[i][0] = 'w';
-                    this.board[i][boardSize - 1] = 'w'
-                }
+                this.setWall();
                 
                 //this.board[15][10] = 'f';
                 this.foodCnt = 0;
+                this.spdCnt = 0;    //speed count
                 
                 this.snakeDir = 'r';
                 
@@ -64,10 +62,30 @@
                 
                 this.snake[0].setPos((boardSize/2)>>0, (boardSize/2)>>0);   // start from the center
                 //this.snake[0].setPos(0,0);
+                this.theme = (((this.snakeLength - 1) / 5)>>0) % 2;
                 
                 this.addSnakeToBoard();
+                document.getElementById('wall-area').style.height=(boardSize*pieceSize);
+                document.getElementById('wall-area').style.width=(boardSize*pieceSize);
+                document.getElementById('wall-area').className='boardBG'+this.theme;
+                this.drawWall('cell'+this.theme);
                 this.drawAll();
             };
+            
+            Board.prototype.setWall = function() {
+                for (var i = 0; i < boardSize; i++) {
+                    this.board[0][i] = 'w';
+                    this.board[boardSize - 1][i] = 'w';
+                    this.board[i][0] = 'w';
+                    this.board[i][boardSize - 1] = 'w'
+                }
+                var wallCnt = (boardSize * boardSize) * difficulty / 100;
+                for (var i = 0; i < wallCnt; i++) {
+                    var wallX = Math.floor(Math.random()*boardSize);
+                    var wallY = Math.floor(Math.random()*boardSize);
+                    this.board[wallX][wallY] = 'w';
+                }
+            }
             
             Board.prototype.addSnakeToBoard = function() {
                 // first clear the board;
@@ -122,8 +140,14 @@
             
             Board.prototype.step = function() {
                 if (stop == false) {
-                    this.snakeMove();
-                    this.addSnakeToBoard();
+                    if (this.spdCnt == speed) {
+                        this.snakeMove();
+                        this.addSnakeToBoard();
+                        enable = true;
+                        this.spdCnt = 0;
+                    }else{
+                        this.spdCnt++;
+                    }
                     this.drawAll();
                 }
             };
@@ -140,33 +164,49 @@
                         this.snakeLength++;
                         //this.addSnakeToBoard();
                         this.foodCnt--;
-                        updateScore(this.snakeLength - 1);
                         break;
                 }
             }
             
-            Board.prototype.drawAll = function() {
-                clearGameArea();
+            Board.prototype.drawWall = function(wallClass) {
+                document.getElementById('wall-area').innerhtml = '';
                 for (var i = 0; i < boardSize; i++) {
                     for (var j = 0; j < boardSize; j++) {
-                        if (this.board[i][j] == 'w'){
-                            var line = '<div style="position: absolute; left:'+(i*pieceSize)+'px; top:'+(j*pieceSize)+'px;">';
+                        if (this.board[i][j] == 'w') {
+                            var line = '<div class="cell ' + wallClass + '" ';
+                            line += 'style="left: ' + (i*pieceSize) + 'px; top: '+(j*pieceSize)+'px;">';
                             line += '<img src="wall.jpg" /></div>';
-                            document.getElementById('game-area').innerHTML += line;
-                            }
+                            document.getElementById('wall-area').innerHTML += line;
+                        }
+                    }                    
+                }
+            }
+            
+            Board.prototype.drawAll = function() {
+                var score = this.snakeLength - 1;
+                var newTheme = ((score / 5) >> 0) % 2;
+                if (this.theme != newTheme){
+                    this.theme = newTheme;
+                    document.getElementById('wall-area').className='boardBG'+this.theme;
+                }
+                document.getElementById('game-area').innerHTML = ''; //clear game area
+                for (var i = 0; i < boardSize; i++) {
+                    for (var j = 0; j < boardSize; j++) {
                         if (this.board[i][j] == 's'){
-                            var line = '<div style="position: absolute; left:'+(i*pieceSize)+'px; top:'+(j*pieceSize)+'px;">';
+                            var line = '<div class="cell cell' + this.theme + '" style="left:'+(i*pieceSize)+'px; top:'+(j*pieceSize)+'px;">';
                             line += '<img src="snake.jpg" /></div>';
                             document.getElementById('game-area').innerHTML += line;
                             }
                         if (this.board[i][j] == 'f'){
-                            var line = '<div style="position: absolute; left:'+(i*pieceSize)+'px; top:'+(j*pieceSize)+'px;">';
+                            var line = '<div class="cell cell' + this.theme + '" style="left:'+(i*pieceSize)+'px; top:'+(j*pieceSize)+'px;">';
                             line += '<img src="food.jpg" /></div>';
                             document.getElementById('game-area').innerHTML += line;
                             }
                         }
-                    }
-                };
+                }
+                    
+                updateScore(score);
+            };
                 
                 function clearGameArea() {
                     document.getElementById('game-area').innerHTML = '';
@@ -177,35 +217,54 @@
         </script>
     </head>
     <body>
-        <div id="game-area" tabindex="0">
+        <div id="board-area">
+            <div id="wall-area" style="z-index: 0;">
+            </div>
+            <div id="game-area" style="z-index: 1;">
+            </div>
         </div>
         <div id="score-area" class="rightDiv">
         score: 0
         </div>
         <script type="text/javascript">
                 var gameBoard = new Board();
-                setInterval('gameBoard.step()', speed);
+                setInterval('gameBoard.step()', 20);
                 window.addEventListener('keydown', function(event) {
                 switch (event.keyCode) {
                     case 37: // Left
-                        if (gameBoard.snakeDir != 'r'){
-                            gameBoard.snakeDir = 'l';
+                        if (enable) {
+                            if (gameBoard.snakeDir != 'r'){
+                                gameBoard.snakeDir = 'l';
+                            }
+                            enable = false;
                         }
                         break;
                     case 38: // Up
-                        if (gameBoard.snakeDir != 'd'){
-                            gameBoard.snakeDir = 'u';
+                        if (enable) {
+                            if (gameBoard.snakeDir != 'd'){
+                                gameBoard.snakeDir = 'u';
+                            }
+                            enable = false;
                         }
                         break;
                     case 39: // Right
-                        if (gameBoard.snakeDir != 'l'){
-                            gameBoard.snakeDir = 'r';
+                        if (enable) {
+                            if (gameBoard.snakeDir != 'l'){
+                                gameBoard.snakeDir = 'r';
+                            }
+                            enable = false;
                         }
                         break;
                     case 40: // Down
-                        if(gameBoard.snakeDir != 'u'){
-                            gameBoard.snakeDir = 'd';
+                        if (enable) {
+                            if(gameBoard.snakeDir != 'u'){
+                                gameBoard.snakeDir = 'd';
+                            }
+                            enable = false;
                         }
+                        break;
+                    case 80: // Pause
+                        stop = !stop;
                         break;
                 }
             }, false);

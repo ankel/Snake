@@ -22,3 +22,42 @@
     background:#ccc;
     padding:10px;
 }
+
+.boardBG0{
+    position: absolute;
+    border-width: 0px;
+    padding: 0px;
+    margin: 0px;
+    top: 0px;
+    left: 0px;
+    background-color: white;
+}
+
+.boardBG1{
+    position: absolute;
+    border-width: 0px;
+    padding: 0px;
+    margin: 0px;
+    top: 0px;
+    left: 0px;
+    background-color: black;
+}
+
+.cell{
+    position: absolute;
+    border-width: 2px;
+    width: 16px;
+    padding: 0px;
+    margin: 0px;
+    height: 16px;
+}
+
+.cell0{
+    border-style: solid;
+    border-color: black;
+}
+
+.cell1{
+    border-style: double;
+    border-color: Chartreuse;
+}
